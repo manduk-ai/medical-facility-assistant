@@ -1,0 +1,18 @@
+python-dotenv
+openai
+streamlit
+pinecone-client
+dateparser
+spacy
+requests
+cherrypy
+st-pages
+streamlit_calendar
+
+## Additionally we need to install the transformers model for spacy
+## the first one is memory efficient but less acurate - minimal memory consumption and up time
+# python -m spacy download en_core_web_sm
+## the second one is more accurate but requires more memory - probably ~1GB or more
+# python -m spacy download en_core_web_lg
+## the third one is the most accurate but requires even more memory - probably ~2GB or more
+# python -m spacy download en_core_web_trf 
