@@ -51,7 +51,7 @@ CLIENT_ID=xxx
 CLIENT_SECRET=xxx
 APP_URI="your domain or http://localhost:8501/"
 ```
-4. Go to your AWS instance, pull the image the hub and run the container
+4. Go to your AWS instance, pull the image from the hub and run the container
 
 ```bash
 docker run --name container_name -d -v $(pwd)/.env:/app/.env -p 127.0.0.1:8501:8501 docker_account_name/repo_name:tag_name
@@ -64,6 +64,7 @@ This repository includes a subset of a synthetic dataset used to fine-tune open-
 This project utilizes a dual licensing model:
 - GNU GPL v3.0: This open-source license permits commercial use but mandates that any derivatives also be distributed under the same terms.
 - Commercial License: Intended for proprietary applications without the obligation to release the source code. For commercial licensing inquiries, please contact manduk.ai.
+
 For detailed information on the resources used in this application and their specific licenses, refer to the RESOURCE-LICENSES file.
 
 ## Final remarks
