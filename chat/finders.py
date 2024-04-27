@@ -1,13 +1,10 @@
 """
-File: finders.py
+Filename: finders.py
 Author: Szymon Manduk
-Date: 2024-02-29
-
-Description:
-    Includes 3 classes that are used to find doctors, medical specialties and temporal data in the input text.
-
-License:
-    To be defined. Contact the author for more information on the terms of use for this software.
+Company: Szymon Manduk AI, manduk.ai
+Description: Includes 3 classes that are used to find doctors, medical specialties and temporal data in the input text.
+License: This project utilizes a dual licensing model: GNU GPL v3.0 and Commercial License. For detailed information on the license used, refer to the LICENSE, RESOURCE-LICENSES and README.md files.
+Copyright (c) 2024 Szymon Manduk AI.
 """
 import sqlite3
 import re
@@ -20,6 +17,13 @@ import spacy
 def find_email_phone(text):
     """
     Function that finds email and telephone number in the input text.
+
+    Args:
+        text (str): The input text to search for email and telephone number.
+
+    Returns:
+        tuple: A tuple containing the found email and telephone number (email, telephone).
+               If no email or telephone number is found, the corresponding value in the tuple will be None.
     """
     # Regular expression for finding email + search
     email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
@@ -50,7 +54,34 @@ def find_email_phone(text):
 
 
 class DoctorFinder:
-    def __init__(self, database):                
+    """
+    A class that helps find doctors based on input text and patient name.
+
+    Attributes:
+        results_by_last_name (dict): A dictionary to store the results by last name.
+        conn (sqlite3.Connection): A connection to the SQLite database.
+        doctor_indicators (list): A list of strings that might be a doctor prefix.
+        pattern (str): A regex pattern to match words.
+
+    Methods:
+        __init__(self, database): Initializes the DoctorFinder object.
+        find_doctors(self, input_text, patient_name): Finds doctors based on input text and patient name.
+        test(self): Example usage of the DoctorFinder class.
+    """
+
+    def __init__(self, database):
+        """
+        Initializes an instance of the Finders class.
+
+        Args:
+            database (str): The path to the SQLite database.
+
+        Attributes:
+            results_by_last_name (dict): A dictionary to store the search results by last name.
+            conn (sqlite3.Connection): The connection to the SQLite database.
+            doctor_indicators (list): A list of strings that might be a doctor prefix.
+            pattern (str): A regex pattern to match words.
+        """                    
         self.results_by_last_name = {}  # Initialize Python dictionary
         self.conn = sqlite3.connect(database)
         self.doctor_indicators = ["dr", "dr.", "doctor", "doc", "doc.", "doktor", "physician", "medic"]  # Define list of strings that might be a doctor prefix
@@ -91,6 +122,16 @@ class DoctorFinder:
         self.conn.close()
 
     def find_doctors(self, input_text, patient_name):
+        """
+        Finds doctors based on the input text and patient name.
+
+        Args:
+            input_text (str): The input text to search for doctor names.
+            patient_name (str): The name of the patient.
+
+        Returns:
+            list: A list of dictionaries containing the details of the matched doctors.
+        """
         # Use regex to split input text into words, ignoring punctuation
         words = re.findall(self.pattern, input_text)
 
@@ -135,7 +176,9 @@ class DoctorFinder:
         return matched_doctors
 
     def test(self):
-        # Example usage
+        """
+        Example usage of the DoctorFinder class.
+        """
         input_text = "I was treated by doc Hernandez and doktor Lewis Linda, but not by the patient Adams."
         patient_name = "Adams"
         matched_doctors = self.find_doctors(input_text, patient_name)
@@ -146,6 +189,17 @@ class DoctorFinder:
 
 
 class MedicalSpecialtyFinder:
+    """
+    This class provides methods to find medical specialties based on keywords.
+
+    Attributes:
+        medical_specialties (dict): A dictionary mapping medical specialties to their corresponding keywords.
+        medical_specialties_plural (dict): A dictionary mapping medical specialties to their plural forms.
+
+    Methods:
+        find_specialty(keyword: str) -> str: Finds the medical specialty based on the given keyword.
+        find_specialty_plural(keyword: str) -> str: Finds the plural form of the medical specialty based on the given keyword.
+    """    
     def __init__(self):
         self.medical_specialties = {
             "general practitioner": ["general practitioner", "family doctor", "family doc", "GP", "family physician", "general practice", "primary care"],
@@ -272,6 +326,16 @@ class MedicalSpecialtyFinder:
 
 
     def find_medical_specialties(self, input_text):
+        """
+        Find medical specialties in the input text.
+
+        Args:
+            input_text (str): The input text to search for medical specialties.
+
+        Returns:
+            list: A list of found medical specialties.
+
+        """
         # Normalize the input text: lowercase, pad with spaces, replace punctuation
         normalized_input_text = " " + input_text.lower() + " "
         for punct in [".", ",", ";", ":", "?", "!", "—", "-"]:
@@ -310,8 +374,9 @@ class MedicalSpecialtyFinder:
         return found_specialties
     
     def test(self):
-        # Example usage
-        # input_text = "I have a heart condition and need to see a cardiologist. I also require a blood test and CT."
+        """
+        Test method to demonstrate the usage of the find_medical_specialties function.
+        """
         input_text = "I need to see bone doctor asap and also need a blood test and CT and xray."
         found_specialties = self.find_medical_specialties(input_text)
         print(found_specialties)
@@ -320,8 +385,29 @@ class MedicalSpecialtyFinder:
 class TemporalDataAnalyzer:
     """
     Class that is used to extract temporal data from the input text using spacy, dateutils, regular expressions and fuzzy logic.
-    """
+
+    Attributes:
+    - nlp: Model we use for finding 'DATE' entities in the text.
+
+    Methods:
+    - word_to_number(word): Converts number words to integers.
+    - parse_date_entity(entity): Parses the date entity to extract the date range.
+    - get_date_range_from_text(processed_input): Extracts the date range from the preprocessed input.
+    - preprocess_input(input): Preprocesses the input text.
+    - process_output(range): Processes the extracted date range.
+    """        
     def __init__(self):
+        """
+        Initializes the TemporalDataAnalyzer class.
+
+        This method loads the spaCy English language model and initializes the mapping of number words to their numeric values.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
         # self.nlp = spacy.load('en_core_web_trf')
         # self.nlp = spacy.load('en_core_web_lg')
         self.nlp = spacy.load('en_core_web_sm')
@@ -340,6 +426,15 @@ class TemporalDataAnalyzer:
 
     
     def word_to_number(self, word):
+        """
+        Converts a word or numeric string to its corresponding integer representation.
+
+        Args:
+            word (str): The word or numeric string to be converted.
+
+        Returns:
+            int or None: The integer representation of the word or numeric string. Returns None if the conversion fails.
+        """
         try:
             # Directly convert numeric strings to integers
             return int(word)
@@ -349,6 +444,19 @@ class TemporalDataAnalyzer:
 
 
     def parse_date_entity(self, entity):
+        """
+        Parses a date entity and returns the corresponding date range.
+
+        Args:
+            entity (str): The date entity to parse.
+
+        Returns:
+            tuple: A tuple containing the start date and end date of the parsed date entity.
+
+        Raises:
+            ValueError: If the date entity cannot be parsed.
+
+        """
         today = datetime.now()
         if entity.lower() in ["today"]:
             return today, today + timedelta(days=1)
@@ -503,6 +611,16 @@ class TemporalDataAnalyzer:
 
 
     def get_date_range_from_text(self, text):
+        """
+        Extracts date ranges from the given text.
+
+        Args:
+            text (str): The input text.
+
+        Returns:
+            list: A list of date ranges in the format (start_date, end_date).
+
+        """
         doc = self.nlp(text)
         date_entities = [ent.text for ent in doc.ents if ent.label_ == "DATE"]
         ranges = []
@@ -514,6 +632,16 @@ class TemporalDataAnalyzer:
 
 
     def preprocess_input(self, text):
+        """
+        Preprocesses the input text by replacing specific patterns and phrases with their corresponding replacements.
+
+        Args:
+            text (str): The input text to be preprocessed.
+
+        Returns:
+            str: The preprocessed text with patterns and phrases replaced.
+
+        """
         # Patterns for "24 hours" and its variations
         patterns_24 = r'24\s*(hours?|hrs?|h)'
         replacement_24 = '2 days'
@@ -556,6 +684,16 @@ class TemporalDataAnalyzer:
 
 
     def process_output(self, output):
+        """
+        Process the output of a query and return the date range.
+
+        Args:
+            output (list): A list of tuples containing dates in string format.
+
+        Returns:
+            tuple: A tuple containing the start date and end date of the date range.
+
+        """
         output_len = len(output)
         # If there's more than one tuple, merge into a single range.
         if output_len > 1:
@@ -588,7 +726,14 @@ class TemporalDataAnalyzer:
     def find_temporal_data(self, input):
         """
         Method serving as an interface for extracting temporal data from the input text.
-        As it follows the same interface as the TemporalSUTimeDataAnalyzer class, it returns four date objects, but only date_from and date_to are calculated.
+        
+        This method takes an input text and extracts temporal data from it. It follows the same interface as the TemporalSUTimeDataAnalyzer class.
+        
+        Args:
+            input (str): The input text from which temporal data needs to be extracted.
+            
+        Returns:
+            tuple: A tuple containing four date objects. The first two date objects (date1 and date2) are set to None. The last two date objects (date_from and date_to) represent the calculated date range.
         """
         date1, date2, date_from, date_to = None, None, None, None  # these are the variables we want to extract from the text
 
@@ -596,10 +741,15 @@ class TemporalDataAnalyzer:
         range = self.get_date_range_from_text(processed_input)
         date_from, date_to = self.process_output(range)
 
-        return date1, date2, date_from, date_to  # here are date objects that will be by default printed as "YYYY-MM-DD" 
+        return date1, date2, date_from, date_to  # here are date objects that will be by default printed as "YYYY-MM-DD"
  
    
     def test(self):
+        """
+        This method is used to test the functionality of the `get_date_range_from_text` method.
+        It iterates over a list of example sentences and prints the preprocessed input, raw output,
+        and final dates obtained from the `get_date_range_from_text` method.
+        """        
         examples = [
             "I'd like to make an appointment next week.",
             "next week",

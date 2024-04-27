@@ -1,20 +1,19 @@
 """
-File: model_prompt_engine.py
+Filename: model_prompt_engine.py
 Author: Szymon Manduk
-Date: 2024-03-09
-
+Company: Szymon Manduk AI, manduk.ai
 Description:
     Contains:
     - prompt templates for models / tasks used in chat app,
     - helper functions to apply prompt template
     - helper function to call OpenAI model call.
-    
-License:
-    To be defined. Contact the author for more information on the terms of use for this software.
+License: This project utilizes a dual licensing model: GNU GPL v3.0 and Commercial License. For detailed information on the license used, refer to the LICENSE, RESOURCE-LICENSES and README.md files.
+Copyright (c) 2024 Szymon Manduk AI.
 """
 
 import json
 from chat.booking import book_appointment
+
 
 ##########################################################
 #### main prompt for openai conversation intelligence ####
@@ -62,6 +61,7 @@ def apply_openai_prompt_template(conversation, question, rag, rules='', patient_
             clinic_data=clinic_data,
             response=''
         )
+
 
 ##########################################################
 #### main prompt for llama2 conversation intelligence ####
@@ -113,6 +113,7 @@ Response: {{response}}"""
 # Response: {{response}}"""
 # )
 
+
 # helper function to apply the main prompt template
 def apply_llama2_prompt_template(conversation, question, rag, rules='', patient_data='', clinic_data='', prompt=llama2_prompt_template): 
     return prompt.format(
@@ -126,10 +127,9 @@ def apply_llama2_prompt_template(conversation, question, rag, rules='', patient_
         )
 
 
-##########################################################
-# prompt to classify a current state of conversation 
-# into one of 5 categories 
-
+#############################################################################
+# prompt to classify a current state of conversation into one of N categories 
+#############################################################################
 classification_prompt_template = (
 f"""You work at a medical facility and your task is to assign the correct category to the patient message.
 This is the patient message (between four hashes): 
@@ -178,7 +178,6 @@ Once again, this is the patient message:
 Respond with the category of the patient message in JSON format.""")
 
 
-
 ###################################################
 # prompt to extract the answer from text extracts #
 ###################################################
@@ -209,6 +208,7 @@ def apply_extract_answer_prompt_template(question, information, prompt=extract_a
 
 ###################################################
 ################ translation prompt ###############
+###################################################
 translate_prompt_template = (
 f"""You are an experienced translator working at medical facility. You stick to the terminology and professional tone that are used at medical facilities. While translating you leave first and last names as they are (untranslated). You reply with the translation only (without any additional comments).
 Translate text from {{src_language}} to {{dst_language}}:
@@ -225,12 +225,34 @@ def apply_translate_prompt_template(src_language, dst_language, text, prompt=tra
         )
 
 
-###################################################
-### OpenAI API call with token usage statistics ###
+###############################################################################
+# OpenAI API call with token usage statistics 
 # Documentation:
 # https://platform.openai.com/docs/guides/text-generation/chat-completions-api
 # https://platform.openai.com/docs/api-reference/chat/object
+###############################################################################
 def make_openai_call(open_ai_client, model, prompt, temperature=0.1, verbose=False, **kwargs):
+    """
+    Makes a call to the OpenAI API to generate a response based on the given prompt.
+
+    Args:
+        open_ai_client (object): The OpenAI client object used to make API calls.
+        model (str): The name of the OpenAI model to use for generating the response.
+        prompt (str): The user prompt to use as input for generating the response.
+        temperature (float, optional): Controls the randomness of the generated response. 
+            Higher values (e.g., 0.8) make the output more random, while lower values (e.g., 0.2) make it more deterministic. 
+            Defaults to 0.1.
+        verbose (bool, optional): If True, prints additional information during the execution of the function. 
+            Defaults to False.
+        **kwargs: Additional keyword arguments to pass to the OpenAI API.
+
+    Returns:
+        tuple: A tuple containing the generated response content and a dictionary with token usage statistics.
+
+    Raises:
+        Exception: If an error occurs during the API call.
+
+    """
     try:
         response = open_ai_client.chat.completions.create(
             model=model,  
@@ -304,8 +326,14 @@ def make_openai_call(open_ai_client, model, prompt, temperature=0.1, verbose=Fal
 def check_required_arguments(arguments, required_keys):
     """
     Checks if all required arguments are present in the given arguments dictionary.
-    Returns a tuple (is_valid, message) where is_valid is True if all required keys are present,
-    and message is either an empty string if is_valid is True or a message detailing missing keys.
+
+    Args:
+        arguments (dict): A dictionary containing the arguments to be checked.
+        required_keys (list): A list of keys that are required in the arguments dictionary.
+
+    Returns:
+        tuple: A tuple (is_valid, message) where is_valid is True if all required keys are present,
+        and message is either an empty string if is_valid is True or a message detailing missing keys.
     """
     missing_keys = [key for key in required_keys if key not in arguments or arguments[key] is None or arguments[key] == ""]
     if missing_keys:
@@ -314,6 +342,7 @@ def check_required_arguments(arguments, required_keys):
         return False, message
     else:
         return True, ""
+
 
 # Tools parameter for OpenAI API call - it is used when the model is about to book an appointment
 tools_booking = [

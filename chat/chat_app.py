@@ -72,7 +72,7 @@ else:
 add_page_title()  # adds title and icon to current page
 
 
-# helper function decorator to track token usage within the session. It is used to decorate make_openai_call function
+# A decorator to track token usage within the session. It is used to decorate make_openai_call function
 def track_token_usage(func):
     def wrapper(*args, **kwargs):
         response_content, token_usage = func(*args, **kwargs)

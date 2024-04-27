@@ -112,6 +112,25 @@ class ChatSession:
 
 
     def set_medical_specialties(self, specialties):
+        """
+        Sets the medical specialties for the chat session.
+
+        Args:
+            specialties (list): A list of medical specialties.
+
+        Notes:
+            - Medical specialties are kept as a list of strings.
+            - If the specialties list is not empty, the method sets the value and sets the flag to True.
+            - If the specialties list is empty, the method leaves the value as it is.
+
+        Algorithm:
+            - Iterate over all elements of the input parameter 'specialties'.
+            - Check if each element is already present in self.medical_specialties.
+            - If the element doesn't exist, add it to self.medical_specialties.
+            - If self.medical_specialties exceeds the maximum number of specialties (MAX_SPECIALTIES),
+                remove the first element to maintain a FIFO (First-In, First-Out) behavior.
+
+        """        
         # medical specialties are kept as a list: ['general practitioner', 'orthopedist'], up to elements
         # if specialties are not empty, we set the value and set the flag to True, otherwise we left value as it is
         if specialties:
@@ -128,6 +147,16 @@ class ChatSession:
 
 
     def get_medical_specialties(self, debug=False):
+        """
+        Get the medical specialties.
+
+        Parameters:
+        - debug (bool): If True, only the values of the attributes will be shown without resetting the flag.
+
+        Returns:
+        - list: The medical specialties.
+
+        """        
         if not debug:  # if debug is True, it means we just want to see the values of the attributes, so we don't reset the flag
             self.medical_specialties_new = False  # Reset the flag after the data has been read
         return self.medical_specialties
@@ -136,12 +165,37 @@ class ChatSession:
     def reset_medical_specialties(self):
         """
         Resets the list of medical specialties and sets the flag for new specialties to False.
+        
+        This method clears the existing list of medical specialties and sets the flag indicating whether new specialties have been added to False.
         """
         self.medical_specialties = []
         self.medical_specialties_new = False
 
 
     def set_doctors(self, doctors, extend_medical_specialties=False):
+        """
+        Sets the list of doctors for the chat session.
+
+        Args:
+            doctors (list): A list of dictionaries representing the doctors.
+                Each dictionary should contain the following keys:
+                - 'Specialty name': The name of the doctor's specialty.
+                - 'Doctor specialty ID': The ID of the doctor's specialty.
+
+            extend_medical_specialties (bool, optional): Flag indicating whether to extend the list of medical specialties.
+                If set to True, the method will add new specialties to the existing list of medical specialties.
+                If set to False (default), the method will only add new specialties if they are not already present in the list.
+
+        Returns:
+            None
+
+        Notes:
+            - The method adds the doctors to the list of doctors for the chat session.
+            - If the list of medical specialties needs to be extended, the method adds new specialties to the existing list,
+                maintaining a maximum of MAX_SPECIALTIES elements in FIFO order.
+            - If the list of doctors exceeds MAX_DOCTORS elements, the method removes the first element to maintain FIFO order.
+
+        """
         # if doctors are not empty, we set the value and set the flag to True, otherwise we left value as it is
         if doctors:
             # a) I iterate over all elements of the input parameter 'doctors'
@@ -175,17 +229,68 @@ class ChatSession:
 
 
     def get_doctors(self, debug=False):
+        """
+        Retrieve the list of doctors.
+
+        Parameters:
+        - debug (bool): If True, only the values of the attributes will be shown without resetting the flag.
+
+        Returns:
+        - list: The list of doctors.
+
+        """        
         if not debug:  # if debug is True, it means we just want to see the values of the attributes, so we don't reset the flag
             self.doctors_new = False  # Reset the flag after the data has been read
         return self.doctors
 
 
     def reset_doctors(self):
+        """
+        Resets the list of doctors and sets the flag indicating new doctors to False.
+
+        This function clears the existing list of doctors and sets the `doctors_new` flag to False.
+        Use this function when you want to start with an empty list of doctors and indicate that there are no new doctors.
+
+        Parameters:
+        None
+
+        Returns:
+        None
+        """
         self.doctors = []
         self.doctors_new = False
 
 
     def set_temporal_data(self, data, data_check=False):
+        """
+            Sets the temporal data attributes based on the input data.
+
+            Args:
+                    data (tuple): A tuple containing four elements representing the temporal data.
+                                                The elements are in the following order:
+                                                - temporal_date1: The first temporal date.
+                                                - temporal_date2: The second temporal date.
+                                                - temporal_date_from: The start date of the temporal range.
+                                                - temporal_date_to: The end date of the temporal range.
+                    data_check (bool, optional): A flag indicating whether to perform data checking.
+                                                                             Defaults to False.
+
+            Returns:
+                    None
+
+            Notes:
+                    - If any of the elements in the input data is not None, the values of all attributes are set
+                        and the flag `temporal_data_new` is set to True.
+                    - If `data_check` is True, additional checks are performed:
+                        - If `temporal_date1`, `temporal_date_from`, and `temporal_date_to` are not None,
+                            and `temporal_date1` is within the range of `temporal_date_from` and `temporal_date_to`,
+                            the attributes are not set, but the flag `temporal_data_new` is set to True.
+                        - If `temporal_date2` is None or `temporal_date2` is within the range of `temporal_date_from`
+                            and `temporal_date_to`, the attributes are not set, but the flag `temporal_data_new` is set to True.
+                        - In other words, if `temporal_date1` is the only element present or both `temporal_date1` and
+                            `temporal_date2` are within the range of `temporal_date_from` and `temporal_date_to`,
+                            the range is not modified, but the flag `temporal_data_new` is set to True.
+        """        
         # if any of element of data (the input parameter) is not None, we set the values of all attributes 
         # and set the flag to True, otherwise we left values as they are 
         if data[0] or data[1] or data[2] or data[3]:
@@ -208,6 +313,30 @@ class ChatSession:
 
     # this method extends the temporal data by the number of days
     def extend_temporal_data(self, days):
+        """
+        Extends the temporal data based on the given number of days.
+
+        Args:
+            days (int): The number of days to extend the temporal data.
+
+        Description:
+            This method extends the temporal data based on the given number of days. It updates the values of `self.temporal_date_from` and `self.temporal_date_to` 
+            based on the current values of `self.temporal_date1`, `self.temporal_date2`, `self.temporal_date_from`, and `self.temporal_date_to`.
+
+            If only `self.temporal_date1` is present, the method changes the value of `self.temporal_date1` to `None` and sets the value of `self.temporal_date_from` 
+            to `self.temporal_date1 - days` and `self.temporal_date_to` to `self.temporal_date_from + days`.
+
+            If both `self.temporal_date1` and `self.temporal_date2` are present, the method changes the values of `self.temporal_date1` and `self.temporal_date2` to `None` 
+            and sets the value of `self.temporal_date_from` to `self.temporal_date1 - days` and `self.temporal_date_to` to `self.temporal_date2 + days`.
+
+            If both `self.temporal_date_from` and `self.temporal_date_to` are present, the method changes the value of `self.temporal_date_from` to `self.temporal_date_from - days` 
+            and `self.temporal_date_to` to `self.temporal_date_to + days`.
+
+            If none of the dates are present, the method sets the value of `self.temporal_date_from` to today's date and `self.temporal_date_to` to today's date plus 14 days plus `days`.
+
+            Note: The algorithm looks at the next `EXTEND_ON_NO_DATA` days if all dates are `None`, which is why the code includes the `14 + days` calculation. However, it is unclear if this part of the code is necessary.
+
+        """        
         today = datetime.today().date()
 
         # if only self.temporal_date1 is present, we change the value of self.temporal_date1 to None and instead we set the value of 
@@ -240,6 +369,18 @@ class ChatSession:
     
 
     def get_temporal_data(self, debug=False, limit_dates_to_today=True):
+        """
+        Retrieves temporal data based on the specified date criteria.
+
+        Args:
+            debug (bool, optional): If True, only the attribute values are returned without resetting the flag. 
+                Defaults to False.
+            limit_dates_to_today (bool, optional): If True, limits the date range to today's date if the specified 
+                date range is earlier than today. Defaults to True.
+
+        Returns:
+            str: SQL query string representing the date criteria for retrieving temporal data.
+        """
         if not debug:  # if debug is True, it means we just want to see the values of the attributes, so we don't reset the flag
             self.temporal_data_new = False  # Reset the flag after the data has been read
         if self.temporal_date1 is not None and self.temporal_date2 is None:  # if we have only one date 
@@ -262,6 +403,18 @@ class ChatSession:
 
 
     def reset_temporal_data(self):
+        """
+        Resets the temporal data variables to their initial values.
+
+        This function sets the `temporal_date1`, `temporal_date2`, `temporal_date_from`, and `temporal_date_to` variables to `None`,
+        and sets the `temporal_data_new` flag to `False`.
+
+        Parameters:
+            None
+
+        Returns:
+            None
+        """
         self.temporal_date1, self.temporal_date2, self.temporal_date_from, self.temporal_date_to = None, None, None, None
         self.temporal_data_new = False
 
@@ -286,8 +439,19 @@ class ChatSession:
             return ""
 
 
-    # Method that informs what data are present in the session
     def get_status(self):
+        """
+        Get the status of the chat session.
+
+        Returns:
+            A tuple containing the following information:
+            - ms_present (bool): Indicates if medical specialties are present.
+            - ms_new (bool): Indicates if there are new medical specialties.
+            - doctors_present (bool): Indicates if doctors are present.
+            - doctors_new (bool): Indicates if there are new doctors.
+            - temporal_data_present (bool): Indicates if temporal data is present.
+            - temporal_data_new (bool): Indicates if there is new temporal data.
+        """        
         ms_present, doctors_present, temporal_data_present = False, False, False
         ms_new, doctors_new, temporal_data_new = False, False, False
         if self.medical_specialties:
@@ -304,14 +468,24 @@ class ChatSession:
 
 
     def reset_session(self):
+        """
+        Resets the chat session by resetting the medical specialties, doctors, temporal data, and stats.
+        """
         self.reset_medical_specialties()
         self.reset_doctors()
         self.reset_temporal_data()
         self.reset_stats()
 
 
-    # Method that resets the session (depending on the reset parameter) and initializes the messages for the chat session (depending on the language parameter)
     def reset_and_init_messages(self, session_state, language, reset=True):
+        """
+        Reset the session and initialize messages based on the selected language.
+
+        Args:
+            session_state (dict): The session state dictionary.
+            language (str): The selected language.
+            reset (bool, optional): Whether to reset the session. Defaults to True.
+        """
         if reset:
             self.reset_session()
 
@@ -326,8 +500,17 @@ class ChatSession:
         session_state["original_messages"] = [{"role": "assistant", "content": welcome_messages.get(language, "How can I help you?")}]
 
 
-    # Method that prints the title and welcome description in the selected language
     def display_title(self, st, language):
+        """
+        Display the title and description of the medical facility based on the selected language.
+
+        Parameters:
+        - st (object): Streamlit object used for displaying the title and description.
+        - language (str): The selected language for the title and description.
+
+        Returns:
+        None
+        """
         welcome_title = {
             "English": "Welcome to our medical facility!",
             "Polish": "Witamy w naszej placówce medycznej!",
@@ -345,10 +528,22 @@ class ChatSession:
     
 
     def get_raw_patient_data(self):
+        """
+        Returns the raw patient data.
+
+        Returns: 
+        A tuple containing the patient's first name, last name, email, and phone number.
+        """
         return self.patient_first_name, self.patient_last_name, self.patient_email, self.patient_phone
 
 
     def get_patient_data(self):
+        """
+        Retrieves the patient data and returns it as a formatted string.
+
+        Returns:
+            str: The patient data including first name, last name, email, and phone number.
+        """        
         patient_first_name = f"Patient first name: {self.patient_first_name}\n" if self.patient_first_name else ""
         patient_last_name = f"Patient last name: {self.patient_last_name}\n" if self.patient_last_name else ""
         patient_email = f"Patient email: {self.patient_email}\n" if self.patient_email else ""
@@ -360,6 +555,13 @@ class ChatSession:
 
 
     def get_missing_patient_data(self):
+        """
+        Checks for missing patient data and returns a dictionary of missing data fields and a message.
+
+        Returns:
+            missing_data (dict): A dictionary containing the missing data fields as keys and their descriptions as values.
+            message (str): A message indicating the missing patient data fields.
+        """        
         missing_data = {}
         if not self.patient_first_name:
             missing_data["first_name"] = "patient first name"
@@ -379,6 +581,12 @@ class ChatSession:
 
 
     def get_clinic_data(self):
+        """
+        Returns a string containing the clinic's name, address, phone number, and email.
+
+        Returns:
+            str: A string containing the clinic's name, address, phone number, and email.
+        """        
         return f"{self.clinic_name}, {self.clinic_address}, {self.clinic_phone}, {self.clinic_email}"
 
 
@@ -403,15 +611,41 @@ class ChatSession:
 
 
     def set_classification(self, classification):
+        """
+        Sets the classification of the chat session.
+
+        Parameters:
+        - classification: The classification to be set.
+
+        Returns:
+        None
+        """
         self.previous_class = self.current_class
         self.current_class = classification
 
 
     def get_classification(self):
+        """
+        Returns a tuple containing the previous classification and the current classification.
+
+        Returns:
+            tuple: A tuple containing the previous classification and the current classification.
+        """        
         return (self.previous_class, self.current_class)
 
 
     def set_stats(self, prompt_tokens, response_tokens, model):
+        """
+        Sets the statistics for the given model.
+
+        Args:
+            prompt_tokens (list): The prompt tokens to be added to the statistics.
+            response_tokens (list): The response tokens to be added to the statistics.
+            model (str): The model for which the statistics are being set.
+
+        Returns:
+            None
+        """        
         if model == "gpt-3.5-turbo":
             self.prompt_tokens_gpt3 += prompt_tokens
             self.response_tokens_gpt3 += response_tokens
@@ -421,6 +655,18 @@ class ChatSession:
 
 
     def get_stats(self):
+        """
+        Calculates the statistics and cost for the chat session.
+
+        Returns:
+            A tuple containing the following information:
+            - prompt_tokens_gpt3: The number of prompt tokens used for GPT-3.5-turbo.
+            - response_tokens_gpt3: The number of response tokens used for GPT-3.5-turbo.
+            - cost_gpt3: The cost of using GPT-3.5-turbo.
+            - prompt_tokens_gpt4: The number of prompt tokens used for GPT-4-0125-preview.
+            - response_tokens_gpt4: The number of response tokens used for GPT-4-0125-preview.
+            - cost_gpt4: The cost of using GPT-4-0125-preview.
+        """
         # calculate the cost for "gpt-4-0125-preview"
         cost_gpt4 = self.prompt_tokens_gpt4 * self.COST_PER_PROMPT_TOKEN_GPT4 + self.response_tokens_gpt4 * self.COST_PER_RESPONSE_TOKEN_GPT4
 
@@ -431,7 +677,12 @@ class ChatSession:
 
 
     def reset_stats(self):
+        """
+        Resets the statistics for the chat session.
+
+        This method sets the prompt and response token counts for both GPT-3 and GPT-4 models to zero.
+        """
         self.prompt_tokens_gpt3 = 0  
         self.response_tokens_gpt3 = 0  
         self.prompt_tokens_gpt4 = 0  
-        self.response_tokens_gpt4 = 0  
+        self.response_tokens_gpt4 = 0
