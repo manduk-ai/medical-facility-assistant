@@ -1,0 +1,2 @@
+Important Note: 
+medical_facility.db is a SQLite database that contains detailed information about various medical specialties, doctors, and appointment availabilities at the fictitious "My Medical Facility." Please refer to the main README.md file for a comprehensive description. All personal data within this database are entirely fictional and have been fabricated for simulation purposes. There is no connection to real individuals, living or deceased.
