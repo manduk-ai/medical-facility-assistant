@@ -58,7 +58,7 @@ docker run --name container_name -d -v $(pwd)/.env:/app/.env -p 127.0.0.1:8501:8
 ```
 
 ## Dataset
-This repository includes a portion of a synthetic dataset used to fine-tune open-source models for accurately handling diverse user inquiries. The dataset features dialogues in both English and Polish, simulating interactions typical of a medical facility's hotline. Additionally, the repository provides scripts for fine-tuning Meta Llama 2 models using the Hugging Face library and LoRA technology.
+This repository includes a portion of a synthetic dataset used to fine-tune open-source models for accurately handling diverse user inquiries. The dataset features dialogues in English (Polish version available on request), simulating interactions typical of a medical facility's hotline. Additionally, the repository provides scripts for fine-tuning Meta Llama 2 models using the Hugging Face library and LoRA technology.
 
 ## Licensing
 This project utilizes a dual licensing model:
